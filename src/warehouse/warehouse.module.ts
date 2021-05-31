@@ -10,6 +10,7 @@ import { InventoryEntity } from 'warehouse/entities/inventory.entity';
 import { UpdateItemHandler } from 'warehouse/commands/handlers/update-item-handler';
 import { WarehouseEvents } from 'warehouse/sagas/warehouse-events';
 import { CoreModule } from 'core/core.module';
+import { TransferItemHandler } from 'warehouse/commands/handlers/transfer-item-handler';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CoreModule } from 'core/core.module';
   providers: [
     AddItemHandler,
     UpdateItemHandler,
+    TransferItemHandler,
     InventoryAggregateRepositoryProvider,
     InventoryProjection,
     WarehouseEvents,

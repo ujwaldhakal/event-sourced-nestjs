@@ -14,7 +14,7 @@ export class WarehouseEvents {
       ofType(EventsAdded),
       map((event) => {
         if (event.aggregate.getStreamName() === 'Inventory') {
-          this.projection.project(event.events);
+          this.projection.project(event.events, event.aggregate);
         }
       }),
     );

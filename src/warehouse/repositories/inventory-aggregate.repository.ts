@@ -3,6 +3,8 @@ import { Inventory } from 'warehouse/aggregate/inventory.aggregate';
 import { EventSourcedAggregateStore } from 'eventsourcing/event-sourced-aggregate-store';
 import { InventoryProjection } from 'warehouse/projections/inventory.projection';
 import { ItemAdded } from 'warehouse/domain-events/ItemAddedEvent';
+import { ItemUpdated } from 'warehouse/domain-events/ItemUpdatedEvent';
+import { ItemTransferred } from 'warehouse/domain-events/ItemTransferredEvent';
 
 @Injectable()
 export class InventoryAggregateRepository {
@@ -27,6 +29,20 @@ export class InventoryAggregateRepository {
       if (event.eventName === 'ItemAdded') {
         inventory.apply(
           new ItemAdded({ ...event.payload, inventoryId: aggregateId }),
+          true,
+        );
+      }
+
+      if (event.eventName === 'ItemUpdated') {
+        inventory.apply(
+          new ItemUpdated({ ...event.payload, inventoryId: aggregateId }),
+          true,
+        );
+      }
+
+      if (event.eventName === 'ItemTransferred') {
+        inventory.apply(
+          new ItemTransferred({ ...event.payload, inventoryId: aggregateId }),
           true,
         );
       }
