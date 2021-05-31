@@ -2,6 +2,7 @@ import { Inject, Injectable, Provider } from '@nestjs/common';
 import { Inventory } from 'warehouse/aggregate/inventory.aggregate';
 import { EventSourcedAggregateStore } from 'eventsourcing/event-sourced-aggregate-store';
 import { InventoryProjection } from 'warehouse/projections/inventory.projection';
+import { ItemAdded } from 'warehouse/domain-events/ItemAddedEvent';
 
 @Injectable()
 export class InventoryAggregateRepository {
@@ -14,19 +15,25 @@ export class InventoryAggregateRepository {
     return this.aggregateStore.save(inventory);
   }
 
-  // find(aggregateId: string): Promise<Inventory | null> {
-  //   return this.aggregateStore.findById(aggregateId);
-  // }
+  async findOrFail(aggregateId: string): Promise<Inventory> {
+    const events = await this.aggregateStore.findById(aggregateId, 'Inventory');
 
-  // async findOrFail(aggregateId: string): Promise<Inventory> {
-  //   const inventory = await this.find(aggregateId);
-  //
-  //   if (!inventory) {
-  //     throw new Error('');
-  //   }
-  //
-  //   return inventory;
-  // }
+    const inventory = new Inventory(aggregateId);
+    if (!events) {
+      throw new Error('');
+    }
+
+    events.forEach((event) => {
+      if (event.eventName === 'ItemAdded') {
+        inventory.apply(
+          new ItemAdded({ ...event.payload, inventoryId: aggregateId }),
+          true,
+        );
+      }
+    });
+
+    return inventory;
+  }
 }
 
 export const InventoryAggregateRepositoryProvider = {

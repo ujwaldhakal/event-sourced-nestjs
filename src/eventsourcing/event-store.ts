@@ -31,7 +31,7 @@ export class EventStore {
       .where('event.aggregateVersion >= :version', { version: from })
       .andWhere('event.aggregateType = :aggregateType', { aggregateType })
       .andWhere('event.aggregateId = :aggregateId::uuid', { aggregateId })
-      .orderBy('counter', 'ASC');
+      .orderBy('event.aggregateVersion', 'ASC');
 
     if (count) {
       query.take(count);
