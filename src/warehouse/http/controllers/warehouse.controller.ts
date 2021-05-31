@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put } from '@nestjs/common';
+import { Body, Controller, Param, Post, Put } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { AddItemCommand } from 'warehouse/commands/add-item.command';
 import { UpdateItemCommand } from 'warehouse/commands/update-item.command';
@@ -20,12 +20,8 @@ export class WarehouseController {
     );
   }
 
-  @Put('items')
-  async updateItem(): Promise<void> {
-    await this.commandBus.execute(
-      new UpdateItemCommand('6145ae96-dbb9-484a-a1b9-7823fe2f2a24', {
-        unit_price: 300,
-      }),
-    );
+  @Put('items/:id')
+  async updateItem(@Body() body: any, @Param('id') id: string): Promise<void> {
+    await this.commandBus.execute(new UpdateItemCommand(id, { ...body }));
   }
 }

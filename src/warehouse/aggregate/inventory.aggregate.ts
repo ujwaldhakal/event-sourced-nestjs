@@ -1,10 +1,11 @@
 import { IAggregate } from 'eventsourcing/aggregate/aggregate';
 import { ItemAdded } from 'warehouse/domain-events/ItemAddedEvent';
+import { ItemUpdated } from 'warehouse/domain-events/ItemUpdatedEvent';
 
 export class Inventory implements IAggregate {
   public id: string;
   public name: string;
-  public unit_price: number;
+  public unitPrice: number;
   public currency: string;
   public quantity: number;
   public version: number;
@@ -26,17 +27,41 @@ export class Inventory implements IAggregate {
     return this.events;
   }
 
-  public apply(event) {
+  public apply(event, loadFromHistory = false) {
     if (event.constructor.name === 'ItemAdded') {
       this.onItemAdded(event);
     }
-    this.events.push(event);
+
+    if (event.constructor.name === 'ItemUpdated') {
+      this.onItemUpdated(event);
+    }
+
+    if (!loadFromHistory) {
+      this.events.push(event);
+    }
   }
 
   public onItemAdded(event: ItemAdded) {
     this.name = event.getPayload().name;
-    this.unit_price = event.getPayload().unitPrice;
+    this.unitPrice = event.getPayload().unitPrice;
     this.currency = event.getPayload().currency;
     this.quantity = event.getPayload().quantity;
+  }
+
+  public onItemUpdated(event: ItemUpdated) {
+    if (event.getPayload().name) {
+      this.name = event.getPayload().name;
+    }
+
+    if (event.getPayload().unitPrice) {
+      this.unitPrice = event.getPayload().unitPrice;
+    }
+
+    if (event.getPayload().currency) {
+      this.currency = event.getPayload().currency;
+    }
+    if (event.getPayload().quantity) {
+      this.quantity = event.getPayload().quantity;
+    }
   }
 }

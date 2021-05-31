@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { EventEntity } from 'eventsourcing/entities/event-store.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { InventoryEntity } from 'warehouse/entities/inventory.entity';
-import { classToPlain } from 'class-transformer';
+import { classToPlain, plainToClass } from 'class-transformer';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -26,7 +26,14 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it.only('(POST) /warehouse/item', async () => {
+  function createItem(payload) {
+    return request(app.getHttpServer())
+      .post('/warehouse/items')
+      .send(payload)
+      .expect(201);
+  }
+
+  it('(POST) /warehouse/item', async () => {
     const id = uuidv4();
     const payload = {
       id: id,
@@ -35,23 +42,36 @@ describe('AppController (e2e)', () => {
       unitPrice: 100,
       quantity: 5,
     };
-    await request(app.getHttpServer())
-      .post('/warehouse/items')
-      .send(payload)
-      .expect(201);
-
+    await createItem(payload);
     await promisify(setTimeout)(100);
     const inventory = await inventoryRepository.find({ id: id });
     console.log(inventory);
     expect(classToPlain(inventory[0])).toMatchObject(payload);
   });
 
-  it('/ (GET)', async () => {
-    await request(app.getHttpServer())
-      .post('/warehouse/items/arrived')
-      .expect(201);
-
+  it.only('/ (GET)', async () => {
+    const id = uuidv4();
+    const payload = {
+      id: id,
+      name: 'computer',
+      currency: 'npr',
+      unitPrice: 100,
+      quantity: 5,
+    };
+    await createItem(payload);
     await promisify(setTimeout)(100);
+
+    await request(app.getHttpServer())
+      .put(`/warehouse/items/${id}`)
+      .send({ unitPrice: 50 })
+      .expect(200);
+    await promisify(setTimeout)(100);
+
+    const inventory = await inventoryRepository.find({ id: id });
+    expect(inventory).toHaveLength(1);
+    expect(classToPlain(inventory[0])).toMatchObject({
+      unitPrice: 50,
+    });
   });
 
   afterAll(async () => {

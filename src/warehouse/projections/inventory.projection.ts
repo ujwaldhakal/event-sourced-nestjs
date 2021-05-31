@@ -30,22 +30,12 @@ export class InventoryProjection implements Iprojection {
     );
   }
 
-  async whenItemUpdatedEvent(event, queryRunner) {
-    const inventory = await queryRunner.manager.find(InventoryEntity, {
-      id: event.aggregateId,
-    });
-
+  async whenItemUpdated(event: IDomainEvents, queryRunner) {
     return await queryRunner.manager
       .createQueryBuilder(queryRunner)
-      // .from(InventoryEntity, 'inventory')
       .update(InventoryEntity)
-      .set({
-        // ...('unit_price' in event.payload && {
-        unit_price: event.payload.unit_price,
-        // }),
-      })
-      .where('id = :id', { id: event.aggregateId })
-      // .where({ id: event.aggregateId })
+      .set(event.getPayload())
+      .where('id = :id', { id: event.getAggregateId() })
 
       .execute();
   }
