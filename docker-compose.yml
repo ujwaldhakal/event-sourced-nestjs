@@ -1,0 +1,49 @@
+version: "3.4"
+
+services:
+  eventstore:
+    image: eventstore/eventstore:latest
+    restart: on-failure
+    ports:
+      - 2113:2113
+      - 1113:1113
+    environment:
+      EVENTSTORE_CLUSTER_SIZE: "1"
+      EVENTSTORE_INSECURE: "true"
+      EVENTSTORE_RUN_PROJECTIONS: "all"
+      EVENTSTORE_START_STANDARD_PROJECTIONS: "true"
+
+  es-api:
+    build:
+      context: .
+    depends_on:
+      - es-postgres
+    links:
+      - es-postgres
+    volumes:
+      - "./:/app"
+
+    environment:
+      - PORT=${API_PORT}
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_PORT=5432
+      - DATABASE_SCHEMA_SYNC=${DATABASE_SCHEMA_SYNC:-true}
+
+
+    command: "npm run start:dev"
+
+    ports:
+      - ${API_PORT}:${API_PORT}
+
+  es-postgres:
+    image: postgres:alpine
+    restart: always
+    ports:
+    - 5432:5432
+    environment:
+      - POSTGRES_DB=root
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
