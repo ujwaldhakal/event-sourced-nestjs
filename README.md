@@ -1,2 +1,2 @@
 ### Event Sourced Application
-EventSourced application on top on nest js
+It is a simple event sourced system that handles warehouse `ItemAdded`,`ItemUpdated` and `ItemTransferred` events .

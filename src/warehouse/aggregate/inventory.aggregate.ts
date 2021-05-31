@@ -1,6 +1,7 @@
 import { IAggregate } from 'eventsourcing/aggregate/aggregate';
 import { ItemAdded } from 'warehouse/domain-events/ItemAddedEvent';
 import { ItemUpdated } from 'warehouse/domain-events/ItemUpdatedEvent';
+import { ItemTransferred } from 'warehouse/domain-events/ItemTransferredEvent';
 
 export class Inventory implements IAggregate {
   public id: string;
@@ -36,6 +37,10 @@ export class Inventory implements IAggregate {
       this.onItemUpdated(event);
     }
 
+    if (event.constructor.name === 'ItemTransferred') {
+      this.onItemTransferred(event);
+    }
+
     if (!loadFromHistory) {
       this.events.push(event);
     }
@@ -46,6 +51,14 @@ export class Inventory implements IAggregate {
     this.unitPrice = event.getPayload().unitPrice;
     this.currency = event.getPayload().currency;
     this.quantity = event.getPayload().quantity;
+  }
+
+  public onItemTransferred(event: ItemTransferred) {
+    if (this.quantity < event.getPayload().quantity) {
+      throw Error('Cannot transfer items than you have');
+    }
+
+    this.quantity = this.quantity - event.getPayload().quantity;
   }
 
   public onItemUpdated(event: ItemUpdated) {

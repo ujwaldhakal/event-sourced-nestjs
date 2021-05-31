@@ -49,7 +49,7 @@ describe('AppController (e2e)', () => {
     expect(classToPlain(inventory[0])).toMatchObject(payload);
   });
 
-  it.only('/ (GET)', async () => {
+  it('/warehouse/items/:id (PUT) should update the item attributes', async () => {
     const id = uuidv4();
     const payload = {
       id: id,
@@ -72,6 +72,42 @@ describe('AppController (e2e)', () => {
     expect(classToPlain(inventory[0])).toMatchObject({
       unitPrice: 50,
     });
+  });
+
+  it.only('/ (PUT) should transfer the item and reduce quantity at hands', async () => {
+    const id = uuidv4();
+    const payload = {
+      id: id,
+      name: 'computer',
+      currency: 'npr',
+      unitPrice: 100,
+      quantity: 50,
+    };
+    await createItem(payload);
+    await promisify(setTimeout)(5);
+
+    await request(app.getHttpServer())
+      .put(`/warehouse/items/${id}`)
+      .send({ quantity: 45 })
+      .expect(200);
+    await request(app.getHttpServer())
+      .put(`/warehouse/items/transferred/${id}`)
+      .send({ quantity: 5 })
+      .expect(200);
+    await request(app.getHttpServer())
+      .put(`/warehouse/items/transferred/${id}`)
+      .send({ quantity: 10 })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .put(`/warehouse/items/transferred/${id}`)
+      .send({ quantity: 20 })
+      .expect(200);
+    await promisify(setTimeout)(5);
+
+    const inventory = await inventoryRepository.find({ id: id });
+    expect(inventory).toHaveLength(1);
+    expect(inventory[0].quantity).toEqual(10);
   });
 
   afterAll(async () => {

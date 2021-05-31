@@ -2,6 +2,7 @@ import { Body, Controller, Param, Post, Put } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { AddItemCommand } from 'warehouse/commands/add-item.command';
 import { UpdateItemCommand } from 'warehouse/commands/update-item.command';
+import { TransferItemCommand } from 'warehouse/commands/transfer-item.command';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -23,5 +24,13 @@ export class WarehouseController {
   @Put('items/:id')
   async updateItem(@Body() body: any, @Param('id') id: string): Promise<void> {
     await this.commandBus.execute(new UpdateItemCommand(id, { ...body }));
+  }
+
+  @Put('items/transferred/:id')
+  async itemTransferred(
+    @Body() body: any,
+    @Param('id') id: string,
+  ): Promise<void> {
+    await this.commandBus.execute(new TransferItemCommand(id, body.quantity));
   }
 }
