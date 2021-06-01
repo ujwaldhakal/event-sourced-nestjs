@@ -8,3 +8,4 @@ It is a simple event sourced system that handles warehouse `ItemAdded`,`ItemUpda
 - Manage warehouses
 - Add User authentication
 - Use event store DB 
+- Add snapshot
