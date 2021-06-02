@@ -2,7 +2,6 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InventoryAggregateRepository } from 'warehouse/repositories/inventory-aggregate.repository';
 import { Inject } from '@nestjs/common';
 import { UpdateItemCommand } from 'warehouse/commands/update-item.command';
-import { ItemUpdated } from 'warehouse/domain-events/ItemUpdatedEvent';
 
 @CommandHandler(UpdateItemCommand)
 export class UpdateItemHandler implements ICommandHandler<UpdateItemCommand> {

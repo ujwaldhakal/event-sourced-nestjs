@@ -33,6 +33,8 @@ export class EventSourcedAggregateStore {
     this.eventBus.publish(
       new EventsAdded(aggregateRoot, aggregateRoot.getUncommittedEvents()),
     );
+
+    aggregateRoot.commit();
   }
 
   public async findById(

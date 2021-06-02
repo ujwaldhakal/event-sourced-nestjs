@@ -24,8 +24,12 @@ export class Inventory implements IAggregate {
     return 1;
   }
 
-  public getUncommittedEvents() {
+  public getUncommittedEvents(): IDomainEvents[] {
     return this.events;
+  }
+
+  public commit(): void {
+    this.events = [];
   }
 
   public transfer(quantity: number) {
