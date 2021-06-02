@@ -14,9 +14,7 @@ export class UpdateItemHandler implements ICommandHandler<UpdateItemCommand> {
   async execute(command: UpdateItemCommand) {
     const inventory = await this.repository.findOrFail(command.id);
 
-    inventory.apply(
-      new ItemUpdated({ ...command.data, inventoryId: command.id }),
-    );
+    inventory.update({ ...command.data });
 
     await this.repository.save(inventory);
   }

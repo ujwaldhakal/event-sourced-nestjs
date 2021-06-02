@@ -28,6 +28,40 @@ export class Inventory implements IAggregate {
     return this.events;
   }
 
+  public transfer(quantity: number) {
+    if (this.quantity < quantity) {
+      throw Error('Cannot transfer items than you have');
+    }
+
+    this.apply(
+      new ItemTransferred({
+        quantity: quantity,
+        inventoryId: this.id,
+      }),
+    );
+  }
+
+  public update(data) {
+    this.apply(new ItemUpdated({ ...data, inventoryId: this.id }));
+  }
+
+  public addItem(
+    price: number,
+    currency: string,
+    quantity: number,
+    name: string,
+  ): void {
+    this.apply(
+      new ItemAdded({
+        inventoryId: this.id,
+        unitPrice: price,
+        currency: currency,
+        quantity: quantity,
+        name: name,
+      }),
+    );
+  }
+
   public apply(event, loadFromHistory = false) {
     if (event.constructor.name === 'ItemAdded') {
       this.onItemAdded(event);
@@ -54,10 +88,6 @@ export class Inventory implements IAggregate {
   }
 
   public onItemTransferred(event: ItemTransferred) {
-    if (this.quantity < event.getPayload().quantity) {
-      throw Error('Cannot transfer items than you have');
-    }
-
     this.quantity = this.quantity - event.getPayload().quantity;
   }
 

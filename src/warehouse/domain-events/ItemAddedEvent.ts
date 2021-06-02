@@ -8,13 +8,13 @@ export class ItemAdded implements IDomainEvents {
   public constructor(opts: {
     inventoryId: string;
     name: string;
-    price: number;
+    unitPrice: number;
     currency: string;
     quantity: number;
   }) {
     this.inventoryId = opts.inventoryId;
     this.name = opts.name;
-    this.unitPrice = opts.price;
+    this.unitPrice = opts.unitPrice;
     this.currency = opts.currency;
     this.quantity = opts.quantity;
   }

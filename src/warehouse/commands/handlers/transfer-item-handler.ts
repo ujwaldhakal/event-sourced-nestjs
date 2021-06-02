@@ -15,12 +15,7 @@ export class TransferItemHandler
   async execute(command: TransferItemCommand) {
     const inventory = await this.repository.findOrFail(command.id);
 
-    inventory.apply(
-      new ItemTransferred({
-        quantity: command.quantity,
-        inventoryId: command.id,
-      }),
-    );
+    inventory.transfer(command.quantity);
 
     await this.repository.save(inventory);
   }

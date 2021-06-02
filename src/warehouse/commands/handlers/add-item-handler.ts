@@ -16,16 +16,12 @@ export class AddItemHandler implements ICommandHandler<AddItemCommand> {
   async execute(command: AddItemCommand) {
     const inventory = new Inventory(command.id);
 
-    inventory.apply(
-      new ItemAdded({
-        inventoryId: inventory.id,
-        price: command.unitPrice,
-        currency: command.currency,
-        quantity: command.quantity,
-        name: command.name,
-      }),
+    inventory.addItem(
+      command.unitPrice,
+      command.currency,
+      command.quantity,
+      command.name,
     );
-
     await this.repository.save(inventory);
   }
 }
