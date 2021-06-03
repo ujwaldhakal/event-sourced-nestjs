@@ -1,8 +1,9 @@
-import { Body, Controller, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Param, Post, Put, UseFilters } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { AddItemCommand } from 'warehouse/commands/add-item.command';
 import { UpdateItemCommand } from 'warehouse/commands/update-item.command';
 import { TransferItemCommand } from 'warehouse/commands/transfer-item.command';
+import { TransferExceptionFilter } from 'warehouse/exception-filters/transfer-exception-filter';
 
 @Controller('warehouse')
 export class WarehouseController {
@@ -26,6 +27,7 @@ export class WarehouseController {
     await this.commandBus.execute(new UpdateItemCommand(id, { ...body }));
   }
 
+  @UseFilters(TransferExceptionFilter)
   @Put('items/transferred/:id')
   async itemTransferred(
     @Body() body: any,

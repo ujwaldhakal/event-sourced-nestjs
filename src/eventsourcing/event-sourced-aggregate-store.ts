@@ -5,7 +5,6 @@ import { EventEntity } from 'eventsourcing/entities/event-store.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { Inventory } from 'warehouse/aggregate/inventory.aggregate';
 import { EventsAdded } from 'eventsourcing/events/events-added';
-import { IAggregate } from 'eventsourcing/aggregate/aggregate';
 
 @Injectable()
 export class EventSourcedAggregateStore {

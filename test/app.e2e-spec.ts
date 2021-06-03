@@ -1,7 +1,7 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { AppModule } from './../src/app.module';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import { promisify } from 'util';
 import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import { EventEntity } from 'eventsourcing/entities/event-store.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { InventoryEntity } from 'warehouse/entities/inventory.entity';
 import { classToPlain, plainToClass } from 'class-transformer';
+import { constants } from 'http2';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -74,7 +75,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  it.only('/ (PUT) should transfer the item and reduce quantity at hands', async () => {
+  it('/ (PUT) should transfer the item and reduce quantity at hands', async () => {
     const id = uuidv4();
     const payload = {
       id: id,
@@ -108,6 +109,38 @@ describe('AppController (e2e)', () => {
     const inventory = await inventoryRepository.find({ id: id });
     expect(inventory).toHaveLength(1);
     expect(inventory[0].quantity).toEqual(10);
+  });
+
+  it.only('/ (PUT) should throw exception if someone tries to transfer more item than they have', async () => {
+    const id = uuidv4();
+    const payload = {
+      id: id,
+      name: 'computer',
+      currency: 'npr',
+      unitPrice: 100,
+      quantity: 50,
+    };
+    await createItem(payload);
+    await promisify(setTimeout)(5);
+
+    await request(app.getHttpServer())
+      .put(`/warehouse/items/${id}`)
+      .send({ quantity: 45 })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .put(`/warehouse/items/transferred/${id}`)
+      .send({ quantity: 46 })
+      .expect(HttpStatus.UNPROCESSABLE_ENTITY)
+      .expect((res) => {
+        expect(res.body).toMatchObject({
+          title: 'Could not perform action',
+          status: 422,
+          detail: 'Cannot transfer items than you have',
+        });
+      });
+
+    await promisify(setTimeout)(5);
   });
 
   afterAll(async () => {
