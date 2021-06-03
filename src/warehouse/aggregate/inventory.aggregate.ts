@@ -2,6 +2,7 @@ import { IAggregate } from 'eventsourcing/aggregate/aggregate';
 import { ItemAdded } from 'warehouse/domain-events/ItemAddedEvent';
 import { ItemUpdated } from 'warehouse/domain-events/ItemUpdatedEvent';
 import { ItemTransferred } from 'warehouse/domain-events/ItemTransferredEvent';
+import { InsufficientQuantityForTransfer } from 'warehouse/exceptions/insufficient-quantity-for-transfer.exception';
 
 export class Inventory implements IAggregate {
   public id: string;
@@ -34,7 +35,9 @@ export class Inventory implements IAggregate {
 
   public transfer(quantity: number) {
     if (this.quantity < quantity) {
-      throw Error('Cannot transfer items than you have');
+      throw new InsufficientQuantityForTransfer(
+        'Cannot transfer items than you have',
+      );
     }
 
     this.apply(
