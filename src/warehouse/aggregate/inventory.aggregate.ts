@@ -10,8 +10,12 @@ export class Inventory implements IAggregate {
   public unitPrice: number;
   public currency: string;
   public quantity: number;
-  public version: number;
+  public version = 0;
   public events: IDomainEvents[] = [];
+
+  setStreamVersion(version) {
+    this.version = version;
+  }
 
   public constructor(id: string) {
     this.id = id;
@@ -22,7 +26,7 @@ export class Inventory implements IAggregate {
   }
 
   getStreamVersion(): number {
-    return 1;
+    return this.version;
   }
 
   public getUncommittedEvents(): IDomainEvents[] {

@@ -20,6 +20,19 @@ export class EventStore {
       .execute();
   }
 
+  public async getSingleLatestAggregate(
+    aggregateId: string,
+    aggregateType: string,
+  ) {
+    const query = this.eventRepository
+      .createQueryBuilder('event')
+      .andWhere('event.aggregateType = :aggregateType', { aggregateType })
+      .andWhere('event.aggregateId = :aggregateId::uuid', { aggregateId })
+      .orderBy('event.aggregateVersion', 'DESC');
+
+    return query.getOne();
+  }
+
   async loadEventsForAggregate(
     aggregateType: string,
     aggregateId: string,
