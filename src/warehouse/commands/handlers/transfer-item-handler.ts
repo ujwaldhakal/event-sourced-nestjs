@@ -2,7 +2,6 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InventoryAggregateRepository } from 'warehouse/repositories/inventory-aggregate.repository';
 import { Inject } from '@nestjs/common';
 import { TransferItemCommand } from 'warehouse/commands/transfer-item.command';
-import { ItemTransferred } from 'warehouse/domain-events/ItemTransferredEvent';
 
 @CommandHandler(TransferItemCommand)
 export class TransferItemHandler

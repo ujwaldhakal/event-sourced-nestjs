@@ -13,7 +13,23 @@ export class EventSourcedAggregateStore {
     protected readonly eventBus: EventBus,
   ) {}
 
+  public async getAggregateLatestVersion(
+    aggregateId: string,
+    aggregateType: string,
+  ) {
+    return this.eventStore.getSingleLatestAggregate(aggregateId, aggregateType);
+  }
+
   public async save(aggregateRoot: Inventory) {
+    const latestVersion = await this.eventStore.getSingleLatestAggregate(
+      aggregateRoot.id,
+      aggregateRoot.getStreamName(),
+    );
+
+    if (latestVersion) {
+      aggregateRoot.setStreamVersion(latestVersion.aggregateVersion);
+    }
+
     const events = aggregateRoot
       .getUncommittedEvents()
       .map((event: IDomainEvents) => {
@@ -22,7 +38,7 @@ export class EventSourcedAggregateStore {
           aggregateId: event.getAggregateId(),
           payload: event.getPayload(),
           aggregateType: aggregateRoot.getStreamName(),
-          aggregateVersion: aggregateRoot.getStreamVersion(),
+          aggregateVersion: aggregateRoot.getStreamVersion() + 1,
           eventName: event.getEventName(),
         });
       });

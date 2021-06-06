@@ -111,7 +111,7 @@ describe('AppController (e2e)', () => {
     expect(inventory[0].quantity).toEqual(10);
   });
 
-  it.only('/ (PUT) should throw exception if someone tries to transfer more item than they have', async () => {
+  it('/ (PUT) should throw exception if someone tries to transfer more item than they have', async () => {
     const id = uuidv4();
     const payload = {
       id: id,
