@@ -25,24 +25,28 @@ export class InventoryAggregateRepository {
       throw new Error('');
     }
 
+    console.log('check event types', events);
     events.forEach((event) => {
-      if (event.eventName === 'ItemAdded') {
+      if (event.event.type === 'ItemAdded') {
         inventory.apply(
-          new ItemAdded({ ...event.payload, inventoryId: aggregateId }),
+          new ItemAdded({ ...event.event.data, inventoryId: aggregateId }),
           true,
         );
       }
 
-      if (event.eventName === 'ItemUpdated') {
+      if (event.event.type === 'ItemUpdated') {
         inventory.apply(
-          new ItemUpdated({ ...event.payload, inventoryId: aggregateId }),
+          new ItemUpdated({ ...event.event.data, inventoryId: aggregateId }),
           true,
         );
       }
 
-      if (event.eventName === 'ItemTransferred') {
+      if (event.event.type === 'ItemTransferred') {
         inventory.apply(
-          new ItemTransferred({ ...event.payload, inventoryId: aggregateId }),
+          new ItemTransferred({
+            ...event.event.data,
+            inventoryId: aggregateId,
+          }),
           true,
         );
       }

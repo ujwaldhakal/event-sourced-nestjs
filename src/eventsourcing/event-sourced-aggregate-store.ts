@@ -5,6 +5,16 @@ import { EventEntity } from 'eventsourcing/entities/event-store.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { Inventory } from 'warehouse/aggregate/inventory.aggregate';
 import { EventsAdded } from 'eventsourcing/events/events-added';
+import {
+  EventStoreDBClient,
+  FORWARDS,
+  jsonEvent,
+  START,
+} from '@eventstore/db-client';
+
+const client = EventStoreDBClient.connectionString(
+  'esdb://172.20.0.3:2113?tls=false',
+);
 
 @Injectable()
 export class EventSourcedAggregateStore {
@@ -33,22 +43,30 @@ export class EventSourcedAggregateStore {
     const events = aggregateRoot
       .getUncommittedEvents()
       .map((event: IDomainEvents) => {
-        return new EventEntity({
-          id: uuidv4(),
-          aggregateId: event.getAggregateId(),
-          payload: event.getPayload(),
-          aggregateType: aggregateRoot.getStreamName(),
-          aggregateVersion: aggregateRoot.getStreamVersion() + 1,
-          eventName: event.getEventName(),
+        return jsonEvent({
+          data: event.getPayload(),
+          type: event.getEventName(),
         });
       });
 
-    await this.eventStore.save(events);
+    console.log(latestVersion);
 
-    this.eventBus.publish(
-      new EventsAdded(aggregateRoot, aggregateRoot.getUncommittedEvents()),
-    );
+    let existingStream = [];
+    try {
+      existingStream = await client.readStream(aggregateRoot.getStreamName(), {
+        fromRevision: START,
+        direction: FORWARDS,
+        maxCount: 10,
+      });
+    } catch (e) {
+      existingStream = [];
+      // console.log('not existing', e);
+    }
 
+    await client.appendToStream(aggregateRoot.getStreamName(), events, {
+      expectedRevision:
+        existingStream.length > 0 ? 'stream_exists' : 'no_stream',
+    });
     aggregateRoot.commit();
   }
 
@@ -56,9 +74,10 @@ export class EventSourcedAggregateStore {
     aggregateId: string,
     aggregateName: string,
   ): Promise<any> {
-    return await this.eventStore.loadEventsForAggregate(
-      aggregateName,
-      aggregateId,
-    );
+    return client.readStream(`inventory-${aggregateId}`, {
+      fromRevision: START,
+      direction: FORWARDS,
+      maxCount: 10,
+    });
   }
 }

@@ -22,7 +22,7 @@ export class Inventory implements IAggregate {
   }
 
   getStreamName(): string {
-    return 'Inventory';
+    return `inventory-${this.id}`;
   }
 
   getStreamVersion(): number {

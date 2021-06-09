@@ -75,7 +75,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  it('/ (PUT) should transfer the item and reduce quantity at hands', async () => {
+  it.only('/ (PUT) should transfer the item and reduce quantity at hands', async () => {
     const id = uuidv4();
     const payload = {
       id: id,

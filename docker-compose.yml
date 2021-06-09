@@ -1,17 +1,43 @@
 version: "3.4"
 
 services:
-  eventstore:
-    image: eventstore/eventstore:latest
-    restart: on-failure
-    ports:
-      - 2113:2113
-      - 1113:1113
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
     environment:
-      EVENTSTORE_CLUSTER_SIZE: "1"
-      EVENTSTORE_INSECURE: "true"
-      EVENTSTORE_RUN_PROJECTIONS: "all"
-      EVENTSTORE_START_STANDARD_PROJECTIONS: "true"
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  eventstore.db:
+    image: eventstore/eventstore
+    environment:
+      - EVENTSTORE_CLUSTER_SIZE=1
+      - EVENTSTORE_RUN_PROJECTIONS=All
+      - EVENTSTORE_START_STANDARD_PROJECTIONS=true
+      - EVENTSTORE_EXT_TCP_PORT=1113
+      - EVENTSTORE_EXT_HTTP_PORT=2113
+      - EVENTSTORE_INSECURE=true
+      - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
+      - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+    ports:
+      - "1113:1113"
+      - "2113:2113"
 
   es-api:
     build:
@@ -40,7 +66,6 @@ services:
 
   es-postgres:
     image: postgres:alpine
-    restart: always
     ports:
     - 5432:5432
     environment:
