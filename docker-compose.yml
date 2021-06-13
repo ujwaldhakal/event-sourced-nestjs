@@ -43,9 +43,9 @@ services:
     build:
       context: .
     depends_on:
-      - es-postgres
+      - eventstore.db
     links:
-      - es-postgres
+      - eventstore.db
     volumes:
       - "./:/app"
 

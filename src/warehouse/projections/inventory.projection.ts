@@ -1,11 +1,14 @@
-import { QueryRunner } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { EventEntity } from 'eventsourcing/entities/event-store.entity';
 import { InventoryEntity } from 'warehouse/entities/inventory.entity';
 import { Iprojection } from 'eventsourcing/projections/Iprojection';
 import { QueryRunnerFactory } from 'core/query-runner.factory';
 import { IAggregate } from 'eventsourcing/aggregate/aggregate';
 import { Inventory } from 'warehouse/aggregate/inventory.aggregate';
+import { EventStoreDBClient } from '@eventstore/db-client';
+
+const client = EventStoreDBClient.connectionString(
+  'esdb://172.20.0.4:2113?tls=false',
+);
 
 @Injectable()
 export class InventoryProjection implements Iprojection {

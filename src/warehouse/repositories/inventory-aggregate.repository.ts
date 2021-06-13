@@ -18,14 +18,16 @@ export class InventoryAggregateRepository {
   }
 
   async findOrFail(aggregateId: string): Promise<Inventory> {
-    const events = await this.aggregateStore.findById(aggregateId, 'Inventory');
-
     const inventory = new Inventory(aggregateId);
+
+    const events = await this.aggregateStore.findById(
+      inventory.getStreamName(),
+    );
+
     if (!events) {
       throw new Error('');
     }
 
-    console.log('check event types', events);
     events.forEach((event) => {
       if (event.event.type === 'ItemAdded') {
         inventory.apply(

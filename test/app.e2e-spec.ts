@@ -46,11 +46,10 @@ describe('AppController (e2e)', () => {
     await createItem(payload);
     await promisify(setTimeout)(100);
     const inventory = await inventoryRepository.find({ id: id });
-    console.log(inventory);
     expect(classToPlain(inventory[0])).toMatchObject(payload);
   });
 
-  it('/warehouse/items/:id (PUT) should update the item attributes', async () => {
+  it.only('/warehouse/items/:id (PUT) should update the item attributes', async () => {
     const id = uuidv4();
     const payload = {
       id: id,
@@ -75,7 +74,7 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  it.only('/ (PUT) should transfer the item and reduce quantity at hands', async () => {
+  it('/ (PUT) should transfer the item and reduce quantity at hands', async () => {
     const id = uuidv4();
     const payload = {
       id: id,
