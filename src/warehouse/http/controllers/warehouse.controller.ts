@@ -20,6 +20,7 @@ export class WarehouseController {
         body.quantity,
       ),
     );
+    console.log('got upto here');
   }
 
   @Put('items/:id')

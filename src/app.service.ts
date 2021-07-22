@@ -11,11 +11,15 @@ export class AppService implements OnModuleInit {
 
     // const prefixes = ['inventory-'];
     // const filter = { filterOn: STREAM_NAME, prefixes };
-    const subscription = client.subscribeToAll().on('data', (event) => {
-      // const stream = Readable.from(event.event.data.toString());
-      if (event) console.log('should get one at a time', event.event);
-      // console.log('event', Buffer.from(event.event.data).toString('base64'));
-    });
+    const subscription = client
+      .subscribeToStream('$ce-inventory', { resolveLinkTos: true })
+      .on('data', (event) => {
+        // const stream = Readable.from(event.event.data.toString());
+        // console.log('should get one at a time', event.event);
+        console.log('should get one at a time', event.event);
+      });
+
+    console.log('register projection here');
     console.log('register projection here');
   }
 

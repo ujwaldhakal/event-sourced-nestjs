@@ -15,7 +15,7 @@ export class EventSourcedAggregateStore {
   private readonly client: Client;
   public constructor(protected readonly eventStore: EventStore) {
     this.client = EventStoreDBClient.connectionString(
-      'esdb://172.20.0.4:2113?tls=false',
+      'esdb://eventstore.db:2113?tls=false',
     );
   }
 
